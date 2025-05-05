@@ -1,0 +1,265 @@
+ScreenManager:
+    LoginScreen:
+        name: "login"
+    SignupScreen:
+        name: "signup"
+    TaskManagerScreen:
+        name: "task_manager"
+    AddTaskScreen:
+        name: "add_task"
+    CalendarScreen:
+        name: "calendar"
+    ProfileScreen:
+        name: "profile"
+
+<LoginScreen>:
+    FloatLayout:
+        # Background Image
+        Image:
+            source: "images/task_image.png"  # Ensure this path is correct
+            allow_stretch: True
+            keep_ratio: False
+            size_hint: 1, 1
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+
+        # Login Form
+        BoxLayout:
+            orientation: "vertical"
+            size_hint: 0.8, 0.5
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            spacing: 10
+
+            Label:
+                text: "Task Manager"
+                font_size: "32sp"
+                bold: True
+                size_hint_y: None
+                height: self.texture_size[1]
+
+            MDTextField:
+                id: username_input
+                hint_text: "Enter Username"
+                mode: "rectangle"
+
+            MDTextField:
+                id: password_input
+                hint_text: "Enter Password"
+                password: True
+                mode: "rectangle"
+
+            MDRaisedButton:
+                text: "Login"
+                on_release:
+                    app.login(username_input.text, password_input.text)
+
+            MDRaisedButton:
+                text: "Sign Up"
+                on_release:
+                    app.root.current = "signup"
+
+<SignupScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: 20
+        spacing: 10
+
+        MDTextField:
+            id: signup_name_input
+            hint_text: "Enter Name"
+            mode: "rectangle"
+
+        MDTextField:
+            id: signup_username_input
+            hint_text: "Enter Username"
+            mode: "rectangle"
+
+        MDTextField:
+            id: signup_password_input
+            hint_text: "Enter Password"
+            password: True
+            mode: "rectangle"
+
+        MDTextField:
+            id: signup_email_input
+            hint_text: "Enter Email"
+            mode: "rectangle"
+
+        MDRaisedButton:
+            text: "Sign Up"
+            on_release:
+                app.signup(signup_name_input.text, signup_username_input.text, signup_password_input.text, signup_email_input.text)
+
+        MDRaisedButton:
+            text: "Back to Login"
+            on_release:
+                app.root.current = "login"
+
+<TaskManagerScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: 20
+        spacing: 10
+
+        # Search Bar
+        MDTextField:
+            id: search_input
+            hint_text: "Search tasks"
+            mode: "rectangle"
+            on_text: app.search_tasks(self.text)
+
+        # Category Buttons
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: None
+            height: self.minimum_height
+            spacing: 10
+
+            MDRaisedButton:
+                text: "All"
+                on_release: app.load_tasks()
+
+            MDRaisedButton:
+                text: "Completed"
+                on_release: app.filter_tasks_by_category("completed")
+
+            MDRaisedButton:
+                text: "Uncompleted"
+                on_release: app.filter_tasks_by_category("uncompleted")
+
+            MDRaisedButton:
+                text: "Due Soon"
+                on_release: app.filter_tasks_by_category("due_soon")
+
+            MDRaisedButton:
+                text: "Overdue"
+                on_release: app.filter_tasks_by_category("overdue")
+
+            MDRaisedButton:
+                text: "Calendar"
+                on_release: app.open_calendar_screen()
+
+            MDRaisedButton:
+                text: "Add Task"
+                on_release:
+                    app.clear_add_task_fields()
+                    app.prefill_due_date()  # Pre-fill the selected date
+                    app.root.current = "add_task"  # Navigate to Add Task screen
+
+            MDRaisedButton:
+                text: "Profile"
+                on_release:
+                    app.load_profile()
+                    app.root.current = "profile"
+
+            Widget:
+                size_hint_x: None
+                width: 10
+
+            MDRaisedButton:
+                text: "Sign Out"
+                size_hint_x: None
+                width: 100
+                on_release: app.sign_out()
+
+        # Task List
+        ScrollView:
+            MDList:
+                id: task_list
+
+<AddTaskScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: 20
+        spacing: 10
+
+        MDTextField:
+            id: task_input
+            hint_text: "Enter Task"
+            mode: "rectangle"
+
+        MDTextField:
+            id: due_date_input  # Ensure this matches the reference in select_date
+            hint_text: "Enter Due Date (YYYY-MM-DD)"
+            mode: "rectangle"
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: None
+            height: self.minimum_height
+            spacing: 10
+
+            MDTextField:
+                id: time_input
+                hint_text: "Enter Time (HH:MM)"
+                mode: "rectangle"
+
+            MDDropDownItem:
+                id: am_pm_dropdown
+                text: "AM"
+                on_release: app.open_am_pm_menu(self)
+
+        MDDropDownItem:
+            id: tag_dropdown
+            text: "General"
+            on_release: app.open_tag_menu(self)
+
+        MDDropDownItem:
+            id: priority_dropdown
+            text: "Medium"
+            on_release: app.open_priority_menu(self)
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: None
+            height: self.minimum_height
+            spacing: 10
+
+            MDRaisedButton:
+                text: "Cancel"
+                on_release: app.root.current = "task_manager"  # Navigate back to Task Manager
+
+            MDRaisedButton:
+                text: "Save Task"
+                on_release:
+                    app.add_task(task_input.text, due_date_input.text, time_input.text + " " + am_pm_dropdown.text, tag_dropdown.text, priority_dropdown.text)
+
+<ProfileScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: 20
+        spacing: 10
+
+        MDLabel:
+            text: "Profile"
+            halign: "center"
+            font_style: "H4"
+
+        MDTextField:
+            id: name_input
+            hint_text: "Name"
+            mode: "rectangle"
+
+        MDTextField:
+            id: username_input
+            hint_text: "Username"
+            mode: "rectangle"
+            disabled: True  # Username is usually not editable
+
+        MDTextField:
+            id: email_input
+            hint_text: "Email"
+            mode: "rectangle"
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: None
+            height: self.minimum_height
+            spacing: 10
+
+            MDRaisedButton:
+                text: "Cancel"
+                on_release: app.root.current = "task_manager"  # Navigate back to Task Manager
+
+            MDRaisedButton:
+                text: "Save Changes"
+                on_release: app.update_profile(name_input.text, email_input.text)
